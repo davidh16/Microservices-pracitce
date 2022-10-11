@@ -1,0 +1,63 @@
+version: '3'
+
+services:
+
+  authentification-service:
+    build:
+      context: ./authentification-service
+      dockerfile: ./authentification-service.dockerfile
+    restart: always
+    ports:
+      - "8080:80"
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      DSN: "host=postgres port=5432 user=postgres password=password dbname=users sslmode=disable"
+    depends_on:
+      - postgres
+
+  createuser-service:
+      build:
+        context: ./createuser-service
+        dockerfile: ./createuser.dockerfile
+      restart: always
+      ports:
+        - "8081:80"
+      deploy:
+        mode: replicated
+        replicas: 1
+      environment:
+        DSN: "host=postgres port=5432 user=postgres password=password dbname=users sslmode=disable"
+      depends_on:
+        - postgres
+
+  logger-service:
+    build:
+      context: ./logger-service
+      dockerfile: ./logger-service.dockerfile
+    restart: always
+    ports:
+      - "8082:80"
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      DSN: "host=postgres port=5432 user=postgres password=password dbname=logs sslmode=disable"
+    depends_on:
+      - postgres
+
+
+  postgres:
+    container_name: postgres
+    image: postgres
+    restart: always
+    volumes:
+      - ./docker-files/postgres-data:/var/lib/postgresql/data
+      - ./docker-files/.postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD:
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"

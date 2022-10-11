@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "./";
+
+message LogRequest{
+    string name = 1;
+    string data = 2;
+}
+
+message LogResponse{
+    int64 id = 1;
+    string name = 2;
+    string data = 3;
+}
+
+service LoggerService{
+    rpc LogEvent (LogRequest) returns (LogResponse) {}
+}
